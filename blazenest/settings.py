@@ -39,7 +39,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
 
     # Installed apps
-    'accounts',
+    'customuser',
     'accommodation',
 
     # Third party apps
@@ -118,6 +118,10 @@ TIME_ZONE = 'UTC'
 USE_I18N = True
 
 USE_TZ = True
+
+
+# Custom user model
+AUTH_USER_MODEL = 'customuser.CustomUser'
 
 
 # Static files (CSS, JavaScript, Images)
