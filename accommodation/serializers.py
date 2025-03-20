@@ -6,3 +6,8 @@ class AccommodationSerializer(serializers.ModelSerializer):
         model = Accommodation
         fields = '__all__'
 
+class AccommodationListSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Accommodation
+        fields = ['id', 'name', 'price', 'image']
+
