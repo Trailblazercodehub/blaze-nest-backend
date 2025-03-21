@@ -22,5 +22,6 @@ urlpatterns = [
     re_path(r'^auth/', include('djoser.urls')),
     re_path(r'^auth/', include('djoser.urls.jwt')),
     re_path(r'api/accommodation/', include('accommodation.urls')),
-    re_path(r'api/booking/', include('booking.urls'))
+    re_path(r'api/booking/', include('booking.urls')),
+    re_path(r'api/vendors/', include('vendors.urls'))
 ]
