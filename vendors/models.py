@@ -1,6 +1,6 @@
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin
 from django.db import models
-
+from django.conf import settings
 
 class VendorManager(BaseUserManager):
     def create_vendor(self, email, business_name, password=None):
@@ -12,7 +12,12 @@ class VendorManager(BaseUserManager):
         return vendor
 
 
-class Vendor(AbstractBaseUser, PermissionsMixin):
+class Vendor(models.Model):
+    user = models.OneToOneField(
+        settings.AUTH_USER_MODEL, 
+        on_delete=models.CASCADE, 
+        related_name="vendor_profile"
+    )
     email = models.EmailField(unique=True)
     business_name = models.CharField(max_length=255)
     phone_number = models.CharField(max_length=20, blank=True, null=True)
