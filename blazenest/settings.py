@@ -45,6 +45,7 @@ INSTALLED_APPS = [
     'vendors',
     'maintenance',
     'security',
+    'entreprenuership_hub',
 
     # Third party apps
     'rest_framework',
