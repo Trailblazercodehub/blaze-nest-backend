@@ -43,6 +43,9 @@ INSTALLED_APPS = [
     'accommodation',
     'booking',
     'vendors',
+    'maintenance',
+    'security',
+    'entreprenuership_hub',
 
     # Third party apps
     'rest_framework',
