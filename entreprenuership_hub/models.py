@@ -11,7 +11,8 @@ class Event(models.Model):
 
     def __str__(self):
         return self.title
-    
+
+
 class CoWorking(models.Model):
     name = models.CharField(max_length=100)
     description = models.TextField()
@@ -24,6 +25,7 @@ class CoWorking(models.Model):
     def __str__(self):
         return self.name
     
+
 class CoWorkingApplication(models.Model):
     user = models.ForeignKey('customuser.CustomUser', on_delete=models.CASCADE)
     coworking = models.ForeignKey(CoWorking, on_delete=models.CASCADE)
@@ -45,7 +47,8 @@ class Incubator(models.Model):
 
     def __str__(self):
         return self.name
-    
+
+
 class IncubatorApplication(models.Model):
     user = models.ForeignKey('customuser.CustomUser', on_delete=models.CASCADE)
     incubator = models.ForeignKey(Incubator, on_delete=models.CASCADE)
