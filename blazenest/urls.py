@@ -40,14 +40,14 @@ urlpatterns = [
     path('', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),
     path('redoc/', schema_view.with_ui('redoc', cache_timeout=0), name='schema-redoc'),
     path('admin/', admin.site.urls),
-    re_path(r'^auth/', include('djoser.urls')),
-    re_path(r'^auth/', include('djoser.urls.jwt')),
-    re_path(r'api/accommodation/', include('accommodation.urls')),
-    re_path(r'api/booking/', include('booking.urls')),
-    re_path(r'api/vendors/', include('vendors.urls')),
-    re_path(r'api/maintenance/', include('maintenance.urls')),
-    re_path(r'api/security/', include('security.urls')),
-    re_path(r'api/ent/', include('entreprenuership_hub.urls'))
+    re_path(r'api/v1/auth/', include('djoser.urls')),
+    re_path(r'api/v1/auth/', include('djoser.urls.jwt')),
+    re_path(r'api/v1/accommodation/', include('accommodation.urls')),
+    re_path(r'api/v1/booking/', include('booking.urls')),
+    re_path(r'api/v1/vendors/', include('vendors.urls')),
+    re_path(r'api/v1/maintenance/', include('maintenance.urls')),
+    re_path(r'api/v1/security/', include('security.urls')),
+    re_path(r'api/v1/ent/', include('entreprenuership_hub.urls'))
 ]
 
 if settings.DEBUG:
