@@ -1,4 +1,6 @@
 from django.db import models
+import cloudinary
+from cloudinary.models import CloudinaryField
 
 # Create your models here.
 class Accommodation(models.Model):
@@ -11,7 +13,7 @@ class Accommodation(models.Model):
     email = models.EmailField(null=True, blank=True)
     website = models.URLField(null=True, blank=True)
     description = models.TextField(null=True, blank=True)
-    image = models.ImageField(upload_to='accommodation/images/', null=True, blank=True)
+    image = CloudinaryField(null=True, blank=True)
     price = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
     number_of_rooms = models.IntegerField(null=True, blank=True)
     amenities = models.CharField(max_length=255, null=True, blank=True)
