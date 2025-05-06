@@ -12,6 +12,10 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 
 from pathlib import Path
 import os
+from datetime import timedelta
+import cloudinary.models
+from decouple import config
+
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -21,12 +25,14 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-rcw$h04u@a(4s4_i5600rf&w=)g%hk%knmj1-3kwk6%%0(znyp'
+SECRET_KEY = config('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
 ALLOWED_HOSTS = []
+
+DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
 
 
 # Application definition
@@ -53,6 +59,8 @@ INSTALLED_APPS = [
     'djoser',
     'django_filters',
     'drf_yasg', 
+    'cloudinary',
+    'cloudinary_storage',
     
 ]
 
@@ -158,4 +166,22 @@ REST_FRAMEWORK = {
 
 SIMPLE_JWT = {
    'AUTH_HEADER_TYPES': ('JWT',),
+   'ACCESS_TOKEN_LIFETIME': timedelta(days=3),  # Change as needed
+   'REFRESH_TOKEN_LIFETIME': timedelta(days=7),
+   'ROTATE_REFRESH_TOKENS': False,
+   'BLACKLIST_AFTER_ROTATION': True,
 }
+
+import cloudinary
+
+
+
+cloudinary.config(
+    cloud_name=config('CLOUDINARY_CLOUD_NAME'),  # Cloudinary cloud name
+    api_key=config('CLOUDINARY_API_KEY'),  # Cloudinary API key
+    api_secret=config('CLOUDINARY_API_SECRET'),  # Cloudinary API secret
+)
+
+print("Cloudinary Cloud Name:", config('CLOUDINARY_CLOUD_NAME'))
+
+print("DEFAULT_FILE_STORAGE:", DEFAULT_FILE_STORAGE)
