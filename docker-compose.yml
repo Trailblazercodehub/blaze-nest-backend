@@ -1,0 +1,15 @@
+name: docker-project
+
+services:
+  app:
+    image: blazenest-image
+    container_name: blazenest-container
+    # build:
+    #   context: .
+    #   dockerfile: Dockerfile
+    ports:
+      - "8080:80"
+    volumes:
+      - .:/app
+    environment:
+      - NODE_ENV=production
