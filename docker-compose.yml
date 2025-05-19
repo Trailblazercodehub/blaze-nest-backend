@@ -1,14 +1,14 @@
-name: docker-project
+name: blaznest-project
 
 services:
   app:
+    build:
+        context: .
+        dockerfile: Dockerfile
     image: blazenest-image
     container_name: blazenest-container
-    # build:
-    #   context: .
-    #   dockerfile: Dockerfile
     ports:
-      - "8080:80"
+      - "8000:8000"
     volumes:
       - .:/app
     environment:
