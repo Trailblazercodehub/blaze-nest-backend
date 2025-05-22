@@ -62,6 +62,7 @@ INSTALLED_APPS = [
     'drf_yasg', 
     'cloudinary',
     'cloudinary_storage',
+    'django-q2',
     
 ]
 
@@ -186,3 +187,38 @@ cloudinary.config(
 print("Cloudinary Cloud Name:", config('CLOUDINARY_CLOUD_NAME'))
 
 print("DEFAULT_FILE_STORAGE:", DEFAULT_FILE_STORAGE)
+
+
+# Django-Q Configuration
+Q_CLUSTER = {
+    'name': 'blazenest',
+    'workers': 4,
+    'recycle': 500,
+    'timeout': 60,
+    'compress': True,
+    'save_limit': 250,
+    'queue_limit': 500,
+    'cpu_affinity': 1,
+    'label': 'Django Q',
+    'redis': {
+        'host': '127.0.0.1',
+        'port': 6379,
+        'db': 0,
+        'password': None,
+        'socket_timeout': None,
+        'charset': 'utf-8',
+        'errors': 'strict',
+        'unix_socket_path': None
+    }
+}
+
+# Cache configuration (optional but recommended)
+CACHES = {
+    "default": {
+        "BACKEND": "django_redis.cache.RedisCache",
+        "LOCATION": "redis://127.0.0.1:6379/1",
+        "OPTIONS": {
+            "CLIENT_CLASS": "django_redis.client.DefaultClient",
+        }
+    }
+}
