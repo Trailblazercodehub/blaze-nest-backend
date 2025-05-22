@@ -1,57 +1,104 @@
-from django.shortcuts import render
-from rest_framework import viewsets
-from .models import Booking
-from .serializers import BookingSerializer
-
-# new imports 
-from rest_framework import status
+from rest_framework import status, generics, viewsets
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated
-from .notification import notify_user
+from django.utils import timezone
+from .models import Booking
+from .serializers import BookingSerializer
+from .notifications import notify_user
 
-
-# Create your views here.
 class BookingViewSet(viewsets.ModelViewSet):
-    queryset = Booking.objects.all()
+    queryset = Booking.objects.select_related('user', 'accommondation')
     serializer_class = BookingSerializer
-    
-
-
-class BookingCreateAPIView(APIView):
     permission_classes = [IsAuthenticated]
-    
-    def post(self, request, *args, **kwargs):
-        serializer = BookingSerializer(data=request.data, context={'request': request})
-        
-        if serializer.is_valid():
-            booking = serializer.save(user=request.user)
-            
-            # send async notification
+
+    def get_queryset(self):
+        # Users can only see their own bookings
+        return self.queryset.filter(user=self.request.user)
+
+    def perform_create(self, serializer):
+        booking = serializer.save(user=self.request.user)
+        self._send_creation_notifications(booking)
+
+    def perform_update(self, serializer):
+        booking = serializer.save()
+        self._send_update_notifications(booking)
+
+    def perform_destroy(self, instance):
+        self._send_cancellation_notifications(instance)
+        super().perform_destroy(instance)
+
+    def _send_creation_notifications(self, booking):
+        """Send notifications when a booking is created"""
+        # Notification to guest
+        notify_user(
+            user=booking.user,
+            notification_type="booking_confirmation",
+            context={
+                'booking_id': booking.id,
+                'accommodation_name': booking.accommondation.name if booking.accommondation else "N/A",
+                'total_amount': booking.total_amount,
+                'booking_date': timezone.now().strftime("%Y-%m-%d %H:%M"),
+            }
+        )
+
+        # Notification to accommodation owner
+        if booking.accommondation and booking.accommondation.owner:
             notify_user(
-                user=request.user,
-                notification_type="booking_confirmation",
+                user=booking.accommondation.owner,
+                notification_type="new_booking_received",
                 context={
                     'booking_id': booking.id,
-                    'date': booking.date,
-                    'time': booking.time,
+                    'guest_name': booking.user.get_full_name() or booking.user.username,
+                    'accommodation_name': booking.accommondation.name,
+                    'total_amount': booking.total_amount,
+                    'booking_date': timezone.now().strftime("%Y-%m-%d %H:%M"),
                 }
             )
-            return Response(
-                serializer.data,
-                status=status.HTTP_201_CREATED
+
+    def _send_update_notifications(self, booking):
+        """Send notifications when a booking is updated"""
+        notify_user(
+            user=booking.user,
+            notification_type="booking_updated",
+            context={
+                'booking_id': booking.id,
+                'accommodation_name': booking.accommondation.name if booking.accommondation else "N/A",
+                'changes': "Your booking details have been updated",
+            }
+        )
+
+    def _send_cancellation_notifications(self, booking):
+        """Send notifications when a booking is cancelled"""
+        notify_user(
+            user=booking.user,
+            notification_type="booking_cancelled",
+            context={
+                'booking_id': booking.id,
+                'accommodation_name': booking.accommondation.name if booking.accommondation else "N/A",
+                'cancellation_date': timezone.now().strftime("%Y-%m-%d %H:%M"),
+            }
+        )
+
+        if booking.accommondation and booking.accommondation.owner:
+            notify_user(
+                user=booking.accommondation.owner,
+                notification_type="booking_cancelled_owner",
+                context={
+                    'booking_id': booking.id,
+                    'guest_name': booking.user.get_full_name() or booking.user.username,
+                    'accommodation_name': booking.accommondation.name,
+                    'cancellation_date': timezone.now().strftime("%Y-%m-%d %H:%M"),
+                }
             )
-            return Response(
-                serializer.errors,
-                status=status.HTTP_400_BAD_REQUEST
-            )
-            
+
 class BookingNotificationAPIView(APIView):
     permission_classes = [IsAuthenticated]
     
     def post(self, request, *args, **kwargs):
         booking_id = request.data.get('booking_id')
         message = request.data.get('message')
+        notification_type = request.data.get('notification_type', 'custom_message')
         
         try:
             booking = Booking.objects.get(id=booking_id, user=request.user)
@@ -59,10 +106,11 @@ class BookingNotificationAPIView(APIView):
             # Send async notification
             notify_user(
                 user=request.user,
-                notification_type="custom_message",
+                notification_type=notification_type,
                 context={
                     'booking_id': booking.id,
                     'message': message,
+                    'accommodation_name': booking.accommondation.name if booking.accommondation else "N/A",
                 }
             )
             

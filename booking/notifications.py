@@ -7,32 +7,41 @@ def send_notification_email(user_id, notification_type, context):
     """
     Actual task that will be executed asynchronously
     """
-    from django.contrib.auth import get_user_model
-    User = get_user_model()
+    from customuser.models import CustomUser
     
     try:
-        user = User.objects.get(id=user_id)
+        user = CustomUser.objects.get(id=user_id)
         
         # Email subject and template selection based on notification type
-        if notification_type == "booking_confirmation":
-            subject = f"Booking Confirmation #{context['booking_id']}"
-            template = 'emails/booking_confirmation.html'
-        elif notification_type == "custom_message":
-            subject = "Notification About Your Booking"
-            template = 'emails/custom_notification.html'
-        else:
-            subject = "Notification from BlazeNest"
-            template = 'emails/general_notification.html'
+        email_templates = {
+            "booking_confirmation": {
+                'subject': f"Booking Confirmation #{context.get('booking_id', '')}",
+                'template': 'emails/booking_confirmation.html'
+            },
+            "new_booking_received": {
+                'subject': f"New Booking for {context.get('accommodation_name', 'your accommodation')}",
+                'template': 'emails/new_booking_received.html'
+            },
+            "booking_cancellation": {
+                'subject': f"Booking Cancelled #{context.get('booking_id', '')}",
+                'template': 'emails/booking_cancelled.html'
+            }
+        }
+        
+        template_config = email_templates.get(notification_type, {
+            'subject': "Notification from BlazeNest",
+            'template': 'emails/general_notification.html'
+        })
         
         # Render email content
-        html_content = render_to_string(template, {
+        html_content = render_to_string(template_config['template'], {
             'user': user,
             **context
         })
         
         # Create and send email
         msg = EmailMultiAlternatives(
-            subject,
+            template_config['subject'],
             html_content,
             settings.DEFAULT_FROM_EMAIL,
             [user.email]
@@ -42,7 +51,10 @@ def send_notification_email(user_id, notification_type, context):
         
         return True
     except Exception as e:
-        # Log error here
+        # You should log this error to your error tracking system
+        import logging
+        logger = logging.getLogger(__name__)
+        logger.error(f"Failed to send notification: {str(e)}")
         return False
 
 def notify_user(user, notification_type, context):
