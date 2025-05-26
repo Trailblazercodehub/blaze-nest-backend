@@ -47,7 +47,7 @@ urlpatterns = [
     re_path(r'api/v1/vendors/', include('vendors.urls')),
     re_path(r'api/v1/maintenance/', include('maintenance.urls')),
     re_path(r'api/v1/security/', include('security.urls')),
-    re_path(r'api/v1/ent/', include('entreprenuership_hub.urls'))
+    re_path(r'api/v1/ent/', include('entreprenuership_hub.urls')),
 ]
 
 if settings.DEBUG:

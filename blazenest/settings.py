@@ -9,14 +9,14 @@ https://docs.djangoproject.com/en/5.1/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.1/ref/settings/
 """
-
+from dotenv import load_dotenv
 from pathlib import Path
 import os
 from datetime import timedelta
 import cloudinary.models
 from decouple import config
 
-
+load_dotenv()
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -62,7 +62,7 @@ INSTALLED_APPS = [
     'drf_yasg', 
     'cloudinary',
     'cloudinary_storage',
-    'django-q2',
+    'django_q',
     
 ]
 
@@ -196,6 +196,7 @@ print("DEFAULT_FILE_STORAGE:", DEFAULT_FILE_STORAGE)
 
 
 # Django-Q Configuration
+# Django-Q Configuration
 Q_CLUSTER = {
     'name': 'blazenest',
     'workers': 4,
@@ -207,10 +208,10 @@ Q_CLUSTER = {
     'cpu_affinity': 1,
     'label': 'Django Q',
     'redis': {
-        'host': '127.0.0.1',
-        'port': 6379,
-        'db': 0,
-        'password': None,
+        'host': os.getenv('REDIS_HOST', '127.0.0.1'),  # Add REDIS_HOST to .env if different
+        'port': int(os.getenv('REDIS_PORT', 6379)),    # Add REDIS_PORT to .env if different
+        'db': int(os.getenv('REDIS_DB', 0)),           # Add REDIS_DB to .env if different
+        'password': os.getenv('REDIS_PASSWORD', None),  # Add REDIS_PASSWORD to .env if needed
         'socket_timeout': None,
         'charset': 'utf-8',
         'errors': 'strict',
@@ -222,9 +223,18 @@ Q_CLUSTER = {
 CACHES = {
     "default": {
         "BACKEND": "django_redis.cache.RedisCache",
-        "LOCATION": "redis://127.0.0.1:6379/1",
+        "LOCATION": f"redis://{os.getenv('REDIS_HOST', 'redis')}:{os.getenv('REDIS_PORT', 6379)}/1",
         "OPTIONS": {
             "CLIENT_CLASS": "django_redis.client.DefaultClient",
         }
     }
 }
+# Email settings
+DEBUG = os.getenv('DEBUG', 'False') == 'True'
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend' if not DEBUG else 'django.core.mail.backends.console.EmailBackend'
+EMAIL_HOST = os.getenv('EMAIL_HOST', '')
+EMAIL_PORT = int(os.getenv('EMAIL_PORT', 587))
+EMAIL_USE_TLS = os.getenv('EMAIL_USE_TLS', 'True') == 'True'
+EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER', '')
+EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD', '')
+DEFAULT_FROM_EMAIL = os.getenv('DEFAULT_FROM_EMAIL', 'noreply@blazenest.com')
